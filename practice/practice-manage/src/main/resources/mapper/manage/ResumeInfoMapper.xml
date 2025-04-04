@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lz.manage.mapper.ResumeInfoMapper">
+    
+    <resultMap type="ResumeInfo" id="ResumeInfoResult">
+        <result property="resumeId"    column="resume_id"    />
+        <result property="fullName"    column="full_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="email"    column="email"    />
+        <result property="gender"    column="gender"    />
+        <result property="birthDate"    column="birth_date"    />
+        <result property="address"    column="address"    />
+        <result property="jobIntention"    column="job_intention"    />
+        <result property="education"    column="education"    />
+        <result property="workExperience"    column="work_experience"    />
+        <result property="introduction"    column="introduction"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectResumeInfoVo">
+        select resume_id, full_name, phone, email, gender, birth_date, address, job_intention, education, work_experience, introduction, user_id, dept_id, create_time, update_by, update_time, remark from tb_resume_info
+    </sql>
+
+    <select id="selectResumeInfoList" parameterType="ResumeInfo" resultMap="ResumeInfoResult">
+        <include refid="selectResumeInfoVo"/>
+        <where>  
+            <if test="resumeId != null "> and resume_id = #{resumeId}</if>
+            <if test="fullName != null  and fullName != ''"> and full_name like concat('%', #{fullName}, '%')</if>
+            <if test="gender != null "> and gender = #{gender}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="updateBy != null  and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''"> and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectResumeInfoByResumeId" parameterType="Long" resultMap="ResumeInfoResult">
+        <include refid="selectResumeInfoVo"/>
+        where resume_id = #{resumeId}
+    </select>
+
+    <insert id="insertResumeInfo" parameterType="ResumeInfo" useGeneratedKeys="true" keyProperty="resumeId">
+        insert into tb_resume_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fullName != null and fullName != ''">full_name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="email != null">email,</if>
+            <if test="gender != null">gender,</if>
+            <if test="birthDate != null">birth_date,</if>
+            <if test="address != null">address,</if>
+            <if test="jobIntention != null">job_intention,</if>
+            <if test="education != null">education,</if>
+            <if test="workExperience != null">work_experience,</if>
+            <if test="introduction != null">introduction,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fullName != null and fullName != ''">#{fullName},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="email != null">#{email},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="birthDate != null">#{birthDate},</if>
+            <if test="address != null">#{address},</if>
+            <if test="jobIntention != null">#{jobIntention},</if>
+            <if test="education != null">#{education},</if>
+            <if test="workExperience != null">#{workExperience},</if>
+            <if test="introduction != null">#{introduction},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateResumeInfo" parameterType="ResumeInfo">
+        update tb_resume_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fullName != null and fullName != ''">full_name = #{fullName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="jobIntention != null">job_intention = #{jobIntention},</if>
+            <if test="education != null">education = #{education},</if>
+            <if test="workExperience != null">work_experience = #{workExperience},</if>
+            <if test="introduction != null">introduction = #{introduction},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where resume_id = #{resumeId}
+    </update>
+
+    <delete id="deleteResumeInfoByResumeId" parameterType="Long">
+        delete from tb_resume_info where resume_id = #{resumeId}
+    </delete>
+
+    <delete id="deleteResumeInfoByResumeIds" parameterType="String">
+        delete from tb_resume_info where resume_id in 
+        <foreach item="resumeId" collection="array" open="(" separator="," close=")">
+            #{resumeId}
+        </foreach>
+    </delete>
+</mapper>

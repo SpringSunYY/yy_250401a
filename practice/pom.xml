@@ -234,6 +234,12 @@
                 <version>${practice.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.lz</groupId>
+                <artifactId>practice-manage</artifactId>
+                <version>${practice.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -244,6 +250,7 @@
         <module>practice-quartz</module>
         <module>practice-generator</module>
         <module>practice-common</module>
+        <module>practice-manage</module>
     </modules>
     <packaging>pom</packaging>
 

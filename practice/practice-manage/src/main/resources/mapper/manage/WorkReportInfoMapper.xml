@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lz.manage.mapper.WorkReportInfoMapper">
+    
+    <resultMap type="WorkReportInfo" id="WorkReportInfoResult">
+        <result property="id"    column="id"    />
+        <result property="reportType"    column="report_type"    />
+        <result property="reportDate"    column="report_date"    />
+        <result property="content"    column="content"    />
+        <result property="plan"    column="plan"    />
+        <result property="problems"    column="problems"    />
+        <result property="score"    column="score"    />
+        <result property="comment"    column="comment"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectWorkReportInfoVo">
+        select id, report_type, report_date, content, plan, problems, score, comment, user_id, dept_id, create_time, update_by, update_time, remark from tb_work_report_info
+    </sql>
+
+    <select id="selectWorkReportInfoList" parameterType="WorkReportInfo" resultMap="WorkReportInfoResult">
+        <include refid="selectWorkReportInfoVo"/>
+        <where>  
+            <if test="id != null "> and id = #{id}</if>
+            <if test="reportType != null "> and report_type = #{reportType}</if>
+            <if test="reportDate != null "> and report_date = #{reportDate}</if>
+            <if test="score != null "> and score = #{score}</if>
+            <if test="comment != null  and comment != ''"> and comment = #{comment}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="updateBy != null  and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''"> and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectWorkReportInfoById" parameterType="Long" resultMap="WorkReportInfoResult">
+        <include refid="selectWorkReportInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWorkReportInfo" parameterType="WorkReportInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_work_report_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="reportType != null">report_type,</if>
+            <if test="reportDate != null">report_date,</if>
+            <if test="content != null and content != ''">content,</if>
+            <if test="plan != null">plan,</if>
+            <if test="problems != null">problems,</if>
+            <if test="score != null">score,</if>
+            <if test="comment != null">comment,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="reportType != null">#{reportType},</if>
+            <if test="reportDate != null">#{reportDate},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="plan != null">#{plan},</if>
+            <if test="problems != null">#{problems},</if>
+            <if test="score != null">#{score},</if>
+            <if test="comment != null">#{comment},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWorkReportInfo" parameterType="WorkReportInfo">
+        update tb_work_report_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reportType != null">report_type = #{reportType},</if>
+            <if test="reportDate != null">report_date = #{reportDate},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="plan != null">plan = #{plan},</if>
+            <if test="problems != null">problems = #{problems},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="comment != null">comment = #{comment},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWorkReportInfoById" parameterType="Long">
+        delete from tb_work_report_info where id = #{id}
+    </delete>
+
+    <delete id="deleteWorkReportInfoByIds" parameterType="String">
+        delete from tb_work_report_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lz.manage.mapper.CompanyInfoMapper">
+    
+    <resultMap type="CompanyInfo" id="CompanyInfoResult">
+        <result property="companyId"    column="company_id"    />
+        <result property="companyName"    column="company_name"    />
+        <result property="companyStatus"    column="company_status"    />
+        <result property="address"    column="address"    />
+        <result property="contactNumber"    column="contact_number"    />
+        <result property="email"    column="email"    />
+        <result property="companyDesc"    column="company_desc"    />
+        <result property="companyImage"    column="company_image"    />
+        <result property="userId"    column="user_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectCompanyInfoVo">
+        select company_id, company_name, company_status, address, contact_number, email, company_desc, company_image, user_id, create_time, update_by, update_time, remark from tb_company_info
+    </sql>
+
+    <select id="selectCompanyInfoList" parameterType="CompanyInfo" resultMap="CompanyInfoResult">
+        <include refid="selectCompanyInfoVo"/>
+        <where>  
+            <if test="companyId != null "> and company_id = #{companyId}</if>
+            <if test="companyName != null  and companyName != ''"> and company_name like concat('%', #{companyName}, '%')</if>
+            <if test="companyStatus != null "> and company_status = #{companyStatus}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+            <if test="updateBy != null  and updateBy != ''"> and update_by = #{updateBy}</if>
+            <if test="updateTime != null "> and update_time = #{updateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectCompanyInfoByCompanyId" parameterType="Long" resultMap="CompanyInfoResult">
+        <include refid="selectCompanyInfoVo"/>
+        where company_id = #{companyId}
+    </select>
+
+    <insert id="insertCompanyInfo" parameterType="CompanyInfo" useGeneratedKeys="true" keyProperty="companyId">
+        insert into tb_company_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyName != null and companyName != ''">company_name,</if>
+            <if test="companyStatus != null">company_status,</if>
+            <if test="address != null">address,</if>
+            <if test="contactNumber != null">contact_number,</if>
+            <if test="email != null">email,</if>
+            <if test="companyDesc != null">company_desc,</if>
+            <if test="companyImage != null">company_image,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="companyName != null and companyName != ''">#{companyName},</if>
+            <if test="companyStatus != null">#{companyStatus},</if>
+            <if test="address != null">#{address},</if>
+            <if test="contactNumber != null">#{contactNumber},</if>
+            <if test="email != null">#{email},</if>
+            <if test="companyDesc != null">#{companyDesc},</if>
+            <if test="companyImage != null">#{companyImage},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCompanyInfo" parameterType="CompanyInfo">
+        update tb_company_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyName != null and companyName != ''">company_name = #{companyName},</if>
+            <if test="companyStatus != null">company_status = #{companyStatus},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="contactNumber != null">contact_number = #{contactNumber},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="companyDesc != null">company_desc = #{companyDesc},</if>
+            <if test="companyImage != null">company_image = #{companyImage},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where company_id = #{companyId}
+    </update>
+
+    <delete id="deleteCompanyInfoByCompanyId" parameterType="Long">
+        delete from tb_company_info where company_id = #{companyId}
+    </delete>
+
+    <delete id="deleteCompanyInfoByCompanyIds" parameterType="String">
+        delete from tb_company_info where company_id in 
+        <foreach item="companyId" collection="array" open="(" separator="," close=")">
+            #{companyId}
+        </foreach>
+    </delete>
+</mapper>

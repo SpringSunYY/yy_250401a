@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lz.manage.mapper.PostInfoMapper">
+    
+    <resultMap type="PostInfo" id="PostInfoResult">
+        <result property="postId"    column="post_id"    />
+        <result property="companyId"    column="company_id"    />
+        <result property="postName"    column="post_name"    />
+        <result property="postType"    column="post_type"    />
+        <result property="postDesc"    column="post_desc"    />
+        <result property="postRequired"    column="post_required"    />
+        <result property="postStatus"    column="post_status"    />
+        <result property="userId"    column="user_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectPostInfoVo">
+        select post_id, company_id, post_name, post_type, post_desc, post_required, post_status, user_id, create_time, update_by, update_time, remark from tb_post_info
+    </sql>
+
+    <select id="selectPostInfoList" parameterType="PostInfo" resultMap="PostInfoResult">
+        <include refid="selectPostInfoVo"/>
+        <where>  
+            <if test="postId != null "> and post_id = #{postId}</if>
+            <if test="postName != null  and postName != ''"> and post_name like concat('%', #{postName}, '%')</if>
+            <if test="postType != null "> and post_type = #{postType}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="updateBy != null  and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''"> and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectPostInfoByPostId" parameterType="Long" resultMap="PostInfoResult">
+        <include refid="selectPostInfoVo"/>
+        where post_id = #{postId}
+    </select>
+
+    <insert id="insertPostInfo" parameterType="PostInfo" useGeneratedKeys="true" keyProperty="postId">
+        insert into tb_post_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyId != null">company_id,</if>
+            <if test="postName != null and postName != ''">post_name,</if>
+            <if test="postType != null">post_type,</if>
+            <if test="postDesc != null">post_desc,</if>
+            <if test="postRequired != null">post_required,</if>
+            <if test="postStatus != null">post_status,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="companyId != null">#{companyId},</if>
+            <if test="postName != null and postName != ''">#{postName},</if>
+            <if test="postType != null">#{postType},</if>
+            <if test="postDesc != null">#{postDesc},</if>
+            <if test="postRequired != null">#{postRequired},</if>
+            <if test="postStatus != null">#{postStatus},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePostInfo" parameterType="PostInfo">
+        update tb_post_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="postName != null and postName != ''">post_name = #{postName},</if>
+            <if test="postType != null">post_type = #{postType},</if>
+            <if test="postDesc != null">post_desc = #{postDesc},</if>
+            <if test="postRequired != null">post_required = #{postRequired},</if>
+            <if test="postStatus != null">post_status = #{postStatus},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where post_id = #{postId}
+    </update>
+
+    <delete id="deletePostInfoByPostId" parameterType="Long">
+        delete from tb_post_info where post_id = #{postId}
+    </delete>
+
+    <delete id="deletePostInfoByPostIds" parameterType="String">
+        delete from tb_post_info where post_id in 
+        <foreach item="postId" collection="array" open="(" separator="," close=")">
+            #{postId}
+        </foreach>
+    </delete>
+</mapper>

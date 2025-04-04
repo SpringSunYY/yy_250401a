@@ -61,6 +61,10 @@
             <artifactId>practice-generator</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.lz</groupId>
+            <artifactId>practice-manage</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
