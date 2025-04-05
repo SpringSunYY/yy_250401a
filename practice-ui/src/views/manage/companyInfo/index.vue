@@ -169,6 +169,15 @@
             size="mini"
             type="text"
             icon="el-icon-edit"
+            @click="handleAddPost(scope.row)"
+            v-hasPermi="['manage:postInfo:add']"
+            v-if="scope.row.companyStatus==='1'"
+          >新增岗位
+          </el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manage:companyInfo:edit']"
           >修改
@@ -236,6 +245,51 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 添加或修改岗位信息对话框 -->
+    <el-dialog :title="title" :visible.sync="openPost" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <!--        <el-form-item label="公司编号" prop="companyId">-->
+        <!--          <el-input v-model="form.companyId" placeholder="请输入公司编号"/>-->
+        <!--        </el-form-item>-->
+        <el-form-item label="岗位名称" prop="postName">
+          <el-input v-model="form.postName" placeholder="请输入岗位名称"/>
+        </el-form-item>
+        <el-form-item label="岗位类型" prop="postType">
+          <el-select v-model="form.postType" placeholder="请选择岗位类型">
+            <el-option
+              v-for="dict in dict.type.m_post_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="岗位描述" prop="postDesc">
+          <el-input v-model="form.postDesc" type="textarea" placeholder="请输入内容"/>
+        </el-form-item>
+        <el-form-item label="岗位需求" prop="postRequired">
+          <el-input v-model="form.postRequired" type="textarea" placeholder="请输入内容"/>
+        </el-form-item>
+        <!--        <el-form-item label="状态" prop="postStatus">-->
+        <!--          <el-radio-group v-model="form.postStatus">-->
+        <!--            <el-radio-->
+        <!--              v-for="dict in dict.type.m_common_status"-->
+        <!--              :key="dict.value"-->
+        <!--              :label="parseInt(dict.value)"-->
+        <!--            >{{ dict.label }}-->
+        <!--            </el-radio>-->
+        <!--          </el-radio-group>-->
+        <!--        </el-form-item>-->
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitPostForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -247,12 +301,14 @@ import {
   addCompanyInfo,
   updateCompanyInfo
 } from '@/api/manage/companyInfo'
+import { addPostInfo } from '@/api/manage/postInfo'
 
 export default {
   name: 'CompanyInfo',
-  dicts: ['m_common_status'],
+  dicts: ['m_common_status','m_post_type'],
   data() {
     return {
+      openPost: false,
       //表格展示列
       columns: [
         { key: 0, label: '公司编号', visible: false },
@@ -335,6 +391,22 @@ export default {
     this.getList()
   },
   methods: {
+    /**
+     * 提交岗位表单
+     */
+    submitPostForm() {
+      addPostInfo(this.form).then(response => {
+        this.openPost = false
+        this.$modal.msgSuccess("新增成功");
+      })
+    },
+    /** 打开新增岗位*/
+    handleAddPost(row) {
+      this.reset()
+      this.form.companyId = row.companyId
+      this.openPost = true
+      this.title = '添加岗位'
+    },
     /** 查询公司信息列表 */
     getList() {
       this.loading = true
@@ -347,6 +419,7 @@ export default {
     // 取消按钮
     cancel() {
       this.open = false
+      this.openPost = false
       this.reset()
     },
     // 表单重置

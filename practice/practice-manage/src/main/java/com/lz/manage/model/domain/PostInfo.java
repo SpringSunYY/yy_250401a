@@ -32,6 +32,7 @@ public class PostInfo implements Serializable
 
     /** 公司编号 */
     @Excel(name = "公司编号")
+    private String companyName;
     private Long companyId;
 
     /** 岗位名称 */
@@ -56,6 +57,8 @@ public class PostInfo implements Serializable
 
     /** 创建人 */
     @Excel(name = "创建人")
+    @TableField(exist = false)
+    private String userName;
     private Long userId;
 
     /** 创建时间 */

@@ -2,10 +2,15 @@ package com.lz.manage.model.dto.postInfo;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 import com.lz.manage.model.domain.PostInfo;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 /**
  * 岗位信息Vo对象 tb_post_info
  *
@@ -13,32 +18,50 @@ import com.lz.manage.model.domain.PostInfo;
  * @date 2025-04-04
  */
 @Data
-public class PostInfoInsert implements Serializable
-{
+public class PostInfoInsert implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 岗位编号 */
+    /**
+     * 岗位编号
+     */
     private Long postId;
 
-    /** 公司编号 */
+    /**
+     * 公司编号
+     */
+    @NotNull(message = "公司编号不能为空")
     private Long companyId;
 
-    /** 岗位名称 */
+    /**
+     * 岗位名称
+     */
+    @NotEmpty(message = "岗位名称不能为空")
     private String postName;
 
-    /** 岗位类型 */
+    /**
+     * 岗位类型
+     */
+    @NotNull(message = "岗位类型不能为空")
     private Long postType;
 
-    /** 岗位描述 */
+    /**
+     * 岗位描述
+     */
     private String postDesc;
 
-    /** 岗位描述 */
+    /**
+     * 岗位描述
+     */
     private String postRequired;
 
-    /** 状态（0待审核 1同意 2拒绝） */
+    /**
+     * 状态（0待审核 1同意 2拒绝）
+     */
     private Long postStatus;
 
-    /** 备注 */
+    /**
+     * 备注
+     */
     private String remark;
 
     /**
