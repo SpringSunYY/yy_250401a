@@ -67,10 +67,12 @@ public class ResumeInfoVo implements Serializable
 
     /** 创建人 */
     @Excel(name = "创建人")
+    private String userName;
     private Long userId;
 
     /** 班级 */
     @Excel(name = "班级")
+    private String deptName;
     private Long deptId;
 
     /** 创建时间 */
