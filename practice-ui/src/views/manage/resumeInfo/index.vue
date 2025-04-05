@@ -185,6 +185,13 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-printer"
+            @click="openPrint(scope.row)"
+            v-hasPermi="['manage:resumeInfo:query']"
+          >打印</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manage:resumeInfo:edit']"
@@ -271,17 +278,36 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog
+      title="打印简历"
+      :visible.sync="printVisible"
+      width="800px"
+      append-to-body
+    >
+      <PrintResume :resume="printResume" />
+
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="printVisible = false">取 消</el-button>
+    <el-button type="primary" v-print="'#print-resume'">打 印</el-button>
+  </span>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 import { listResumeInfo, getResumeInfo, delResumeInfo, addResumeInfo, updateResumeInfo } from '@/api/manage/resumeInfo'
+import PrintResume from '@/components/PrintResume/index.vue'
 
 export default {
   name: 'ResumeInfo',
+  components: { PrintResume },
   dicts: ['sys_user_sex'],
   data() {
     return {
+      printVisible: false, // 控制是否渲染打印组件
+      printResume: {} ,     // 当前打印的简历数据
       //表格展示列
       columns: [
         { key: 0, label: '简历编号', visible: false },
@@ -374,6 +400,12 @@ export default {
     this.getList()
   },
   methods: {
+    openPrint(row) {
+      getResumeInfo(row.resumeId).then(response => {
+        this.printResume = response.data
+        this.printVisible = true
+      })
+    },
     /** 查询简历信息列表 */
     getList() {
       this.loading = true
