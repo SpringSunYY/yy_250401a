@@ -23,6 +23,11 @@
             <artifactId>practice-common</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.lz</groupId>
+            <artifactId>practice-system</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

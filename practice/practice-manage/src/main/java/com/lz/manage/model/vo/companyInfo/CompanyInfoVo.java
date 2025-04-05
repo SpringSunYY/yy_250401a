@@ -54,6 +54,7 @@ public class CompanyInfoVo implements Serializable
 
     /** 创建人 */
     @Excel(name = "创建人")
+    private String userName;
     private Long userId;
 
     /** 创建时间 */

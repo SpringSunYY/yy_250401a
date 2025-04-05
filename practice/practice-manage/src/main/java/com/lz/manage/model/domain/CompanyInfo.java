@@ -58,8 +58,12 @@ public class CompanyInfo implements Serializable
     @Excel(name = "公司图片")
     private String companyImage;
 
-    /** 创建人 */
+    /**
+     * 创建人
+     */
     @Excel(name = "创建人")
+    @TableField(exist = false)
+    private String userName;
     private Long userId;
 
     /** 创建时间 */
