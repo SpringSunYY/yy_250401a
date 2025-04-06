@@ -27,18 +27,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectWorkReportInfoList" parameterType="WorkReportInfo" resultMap="WorkReportInfoResult">
         <include refid="selectWorkReportInfoVo"/>
-        <where>  
-            <if test="id != null "> and id = #{id}</if>
-            <if test="reportType != null "> and report_type = #{reportType}</if>
-            <if test="reportDate != null "> and report_date = #{reportDate}</if>
-            <if test="score != null "> and score = #{score}</if>
-            <if test="comment != null  and comment != ''"> and comment = #{comment}</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
-            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}</if>
-            <if test="updateBy != null  and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
-            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''"> and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}</if>
+        <where>
+            <if test="id != null ">and id = #{id}</if>
+            <if test="reportType != null ">and report_type = #{reportType}</if>
+            <if test="reportDate != null ">and report_date = #{reportDate}</if>
+            <if test="score != null ">and score = #{score}</if>
+            <if test="comment != null  and comment != ''">and comment = #{comment}</if>
+            <if test="userId != null ">and user_id = #{userId}</if>
+            <if test="deptId != null ">and dept_id = #{deptId}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+            <if test="updateBy != null  and updateBy != ''">and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''">
+                and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}
+            </if>
         </where>
+        order by create_time desc
     </select>
     
     <select id="selectWorkReportInfoById" parameterType="Long" resultMap="WorkReportInfoResult">
