@@ -174,6 +174,15 @@
             size="mini"
             type="text"
             icon="el-icon-edit"
+            @click="handleAddAssessment(scope.row)"
+            v-if="scope.row.applyStatus==='1'"
+            v-hasPermi="['manage:monthlyAssessmentInfo:add']"
+          >考核
+          </el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manage:postApplyInfo:edit']"
           >修改
@@ -281,6 +290,31 @@
         <el-button type="primary" v-print="'#print-resume'">打 印</el-button>
       </span>
     </el-dialog>
+
+    <!-- 添加或修改月度考核对话框 -->
+    <el-dialog :title="title" :visible.sync="openAssessment" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="考核年份" prop="assessYear">
+          <el-input-number :min="2024" v-model="form.assessYear" placeholder="请输入考核年份"/>
+        </el-form-item>
+        <el-form-item label="考核月份" prop="assessMonth">
+          <el-input-number :min="1" :max="12" v-model="form.assessMonth" placeholder="请输入考核月份"/>
+        </el-form-item>
+        <el-form-item label="考核得分" prop="score">
+          <el-input-number :min="0" :max="100" v-model="form.score" placeholder="请输入考核得分"/>
+        </el-form-item>
+        <el-form-item label="评语" prop="comments">
+          <el-input v-model="form.comments" type="textarea" placeholder="请输入内容"/>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAssessmentForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -295,6 +329,7 @@ import {
 import { getResumeInfo, listResumeInfo } from '@/api/manage/resumeInfo'
 import { listPostInfo } from '@/api/manage/postInfo'
 import PrintResume from '@/components/PrintResume/index.vue'
+import { addMonthlyAssessmentInfo } from '@/api/manage/monthlyAssessmentInfo'
 
 export default {
   name: 'PostApplyInfo',
@@ -302,6 +337,7 @@ export default {
   dicts: ['m_common_status'],
   data() {
     return {
+      openAssessment: false,
       printVisible: false, // 控制是否渲染打印组件
       printResume: {},     // 当前打印的简历数据
       //简历相关信息
@@ -402,6 +438,21 @@ export default {
     this.getPostInfoList()
   },
   methods: {
+    //提交月考核
+    submitAssessmentForm() {
+      addMonthlyAssessmentInfo(this.form).then(res => {
+        this.$modal.msgSuccess('新增成功')
+        this.openAssessment = false
+      })
+    },
+    //打开月度考核对话框
+    handleAddAssessment(row) {
+      this.reset()
+      this.form.companyId = row.companyId
+      this.form.userId = row.userId
+      this.title = '月度考核'
+      this.openAssessment = true
+    },
     openPrint(row) {
       getResumeInfo(row.resumeId).then(response => {
         this.printResume = response.data
@@ -501,6 +552,7 @@ export default {
     // 取消按钮
     cancel() {
       this.open = false
+      this.openAssessment = false
       this.reset()
     },
     // 表单重置
