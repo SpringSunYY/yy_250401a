@@ -188,7 +188,8 @@
             icon="el-icon-printer"
             @click="openPrint(scope.row)"
             v-hasPermi="['manage:resumeInfo:query']"
-          >打印</el-button>
+          >打印
+          </el-button>
           <el-button
             size="mini"
             type="text"
@@ -285,12 +286,12 @@
       width="800px"
       append-to-body
     >
-      <PrintResume :resume="printResume" />
+      <PrintResume :resume="printResume"/>
 
       <span slot="footer" class="dialog-footer">
-    <el-button @click="printVisible = false">取 消</el-button>
-    <el-button type="primary" v-print="'#print-resume'">打 印</el-button>
-  </span>
+        <el-button @click="printVisible = false">取 消</el-button>
+        <el-button type="primary" v-print="'#print-resume'">打 印</el-button>
+      </span>
     </el-dialog>
 
   </div>
@@ -307,7 +308,7 @@ export default {
   data() {
     return {
       printVisible: false, // 控制是否渲染打印组件
-      printResume: {} ,     // 当前打印的简历数据
+      printResume: {},     // 当前打印的简历数据
       //表格展示列
       columns: [
         { key: 0, label: '简历编号', visible: false },

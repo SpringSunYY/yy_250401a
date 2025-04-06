@@ -42,7 +42,7 @@ public class ResumeInfoController extends BaseController
     /**
      * 查询简历信息列表
      */
-    @PreAuthorize("@ss.hasPermi('manage:resumeInfo:list')")
+    @PreAuthorize("@ss.hasPermi('manage:resumeInfo:list,manage:resumeInfo:query')")
     @GetMapping("/list")
     public TableDataInfo list(ResumeInfoQuery resumeInfoQuery)
     {
@@ -72,7 +72,7 @@ public class ResumeInfoController extends BaseController
     /**
      * 获取简历信息详细信息
      */
-    @PreAuthorize("@ss.hasPermi('manage:resumeInfo:query')")
+    @PreAuthorize("@ss.hasAnyPermi('manage:resumeInfo:query,manage:postApplyInfo:query')")
     @GetMapping(value = "/{resumeId}")
     public AjaxResult getInfo(@PathVariable("resumeId") Long resumeId)
     {
