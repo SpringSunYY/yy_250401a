@@ -3,8 +3,12 @@ package com.lz.manage.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.lz.common.utils.SecurityUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,22 +38,20 @@ import com.lz.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/manage/resumeInfo")
-public class ResumeInfoController extends BaseController
-{
+public class ResumeInfoController extends BaseController {
     @Resource
     private IResumeInfoService resumeInfoService;
 
     /**
      * 查询简历信息列表
      */
-    @PreAuthorize("@ss.hasPermi('manage:resumeInfo:list,manage:resumeInfo:query')")
+    @PreAuthorize("@ss.hasAnyPermi('manage:resumeInfo:list,manage:resumeInfo:query')")
     @GetMapping("/list")
-    public TableDataInfo list(ResumeInfoQuery resumeInfoQuery)
-    {
-        ResumeInfo resumeInfo = ResumeInfoQuery.queryToObj(resumeInfoQuery);
+    public TableDataInfo list(ResumeInfoQuery resumeInfoQuery) {
+        ResumeInfo resumeInfo = getResumeInfo(resumeInfoQuery);
         startPage();
         List<ResumeInfo> list = resumeInfoService.selectResumeInfoList(resumeInfo);
-        List<ResumeInfoVo> listVo= list.stream().map(ResumeInfoVo::objToVo).collect(Collectors.toList());
+        List<ResumeInfoVo> listVo = list.stream().map(ResumeInfoVo::objToVo).collect(Collectors.toList());
         TableDataInfo table = getDataTable(list);
         table.setRows(listVo);
         return table;
@@ -61,12 +63,26 @@ public class ResumeInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:resumeInfo:export')")
     @Log(title = "简历信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, ResumeInfoQuery resumeInfoQuery)
-    {
-        ResumeInfo resumeInfo = ResumeInfoQuery.queryToObj(resumeInfoQuery);
+    public void export(HttpServletResponse response, ResumeInfoQuery resumeInfoQuery) {
+        ResumeInfo resumeInfo = getResumeInfo(resumeInfoQuery);
         List<ResumeInfo> list = resumeInfoService.selectResumeInfoList(resumeInfo);
         ExcelUtil<ResumeInfo> util = new ExcelUtil<ResumeInfo>(ResumeInfo.class);
         util.exportExcel(response, list, "简历信息数据");
+    }
+
+    private static ResumeInfo getResumeInfo(ResumeInfoQuery resumeInfoQuery) {
+        ResumeInfo resumeInfo = ResumeInfoQuery.queryToObj(resumeInfoQuery);
+        //查看全部
+        if (!SecurityUtils.hasPermi("manage:all")) {
+            //查看班级
+            if (SecurityUtils.hasPermi("manage:resumeInfo:dept")) {
+                resumeInfo.setDeptId(SecurityUtils.getDeptId());
+            } else {
+                //只能查看自己
+                resumeInfo.setUserId(SecurityUtils.getUserId());
+            }
+        }
+        return resumeInfo;
     }
 
     /**
@@ -74,8 +90,7 @@ public class ResumeInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasAnyPermi('manage:resumeInfo:query,manage:postApplyInfo:query')")
     @GetMapping(value = "/{resumeId}")
-    public AjaxResult getInfo(@PathVariable("resumeId") Long resumeId)
-    {
+    public AjaxResult getInfo(@PathVariable("resumeId") Long resumeId) {
         ResumeInfo resumeInfo = resumeInfoService.selectResumeInfoByResumeId(resumeId);
         return success(ResumeInfoVo.objToVo(resumeInfo));
     }
@@ -86,8 +101,7 @@ public class ResumeInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:resumeInfo:add')")
     @Log(title = "简历信息", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody ResumeInfoInsert resumeInfoInsert)
-    {
+    public AjaxResult add(@RequestBody ResumeInfoInsert resumeInfoInsert) {
         ResumeInfo resumeInfo = ResumeInfoInsert.insertToObj(resumeInfoInsert);
         return toAjax(resumeInfoService.insertResumeInfo(resumeInfo));
     }
@@ -98,8 +112,7 @@ public class ResumeInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:resumeInfo:edit')")
     @Log(title = "简历信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody ResumeInfoEdit resumeInfoEdit)
-    {
+    public AjaxResult edit(@RequestBody ResumeInfoEdit resumeInfoEdit) {
         ResumeInfo resumeInfo = ResumeInfoEdit.editToObj(resumeInfoEdit);
         return toAjax(resumeInfoService.updateResumeInfo(resumeInfo));
     }
@@ -109,9 +122,8 @@ public class ResumeInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:resumeInfo:remove')")
     @Log(title = "简历信息", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{resumeIds}")
-    public AjaxResult remove(@PathVariable Long[] resumeIds)
-    {
+    @DeleteMapping("/{resumeIds}")
+    public AjaxResult remove(@PathVariable Long[] resumeIds) {
         return toAjax(resumeInfoService.deleteResumeInfoByResumeIds(resumeIds));
     }
 }

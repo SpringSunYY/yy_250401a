@@ -197,9 +197,9 @@
     <!-- 添加或修改岗位信息对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="公司编号" prop="companyId">
-          <el-input v-model="form.companyId" placeholder="请输入公司编号"/>
-        </el-form-item>
+<!--        <el-form-item label="公司编号" prop="companyId">-->
+<!--          <el-input v-model="form.companyId" placeholder="请输入公司编号"/>-->
+<!--        </el-form-item>-->
         <el-form-item label="岗位名称" prop="postName">
           <el-input v-model="form.postName" placeholder="请输入岗位名称"/>
         </el-form-item>
@@ -312,7 +312,7 @@ export default {
           { required: true, message: '岗位类型不能为空', trigger: 'change' }
         ],
         postStatus: [
-          { required: true, message: '状态不能为空', trigger: 'change' }
+          { required: false, message: '状态不能为空', trigger: 'change' }
         ],
         userId: [
           { required: true, message: '创建人不能为空', trigger: 'blur' }

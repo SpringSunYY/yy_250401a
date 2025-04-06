@@ -3,8 +3,12 @@ package com.lz.manage.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.lz.common.utils.SecurityUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,8 +38,7 @@ import com.lz.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/manage/companyInfo")
-public class CompanyInfoController extends BaseController
-{
+public class CompanyInfoController extends BaseController {
     @Resource
     private ICompanyInfoService companyInfoService;
 
@@ -44,12 +47,15 @@ public class CompanyInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:companyInfo:list')")
     @GetMapping("/list")
-    public TableDataInfo list(CompanyInfoQuery companyInfoQuery)
-    {
-        CompanyInfo companyInfo = CompanyInfoQuery.queryToObj(companyInfoQuery);
+    public TableDataInfo list(CompanyInfoQuery companyInfoQuery) {
+        CompanyInfo companyInfo = getCompanyInfo(companyInfoQuery);
+        return getTableDataInfo(companyInfo);
+    }
+
+    private TableDataInfo getTableDataInfo(CompanyInfo companyInfo) {
         startPage();
         List<CompanyInfo> list = companyInfoService.selectCompanyInfoList(companyInfo);
-        List<CompanyInfoVo> listVo= list.stream().map(CompanyInfoVo::objToVo).collect(Collectors.toList());
+        List<CompanyInfoVo> listVo = list.stream().map(CompanyInfoVo::objToVo).collect(Collectors.toList());
         TableDataInfo table = getDataTable(list);
         table.setRows(listVo);
         return table;
@@ -61,12 +67,23 @@ public class CompanyInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:companyInfo:export')")
     @Log(title = "公司信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, CompanyInfoQuery companyInfoQuery)
-    {
-        CompanyInfo companyInfo = CompanyInfoQuery.queryToObj(companyInfoQuery);
+    public void export(HttpServletResponse response, CompanyInfoQuery companyInfoQuery) {
+        CompanyInfo companyInfo = getCompanyInfo(companyInfoQuery);
         List<CompanyInfo> list = companyInfoService.selectCompanyInfoList(companyInfo);
         ExcelUtil<CompanyInfo> util = new ExcelUtil<CompanyInfo>(CompanyInfo.class);
         util.exportExcel(response, list, "公司信息数据");
+    }
+
+    private static CompanyInfo getCompanyInfo(CompanyInfoQuery companyInfoQuery) {
+        CompanyInfo companyInfo = CompanyInfoQuery.queryToObj(companyInfoQuery);
+        //判断用户是否有查看全部的权限
+        if (!SecurityUtils.hasPermi("manage:all")  ) {
+            if(!SecurityUtils.hasPermi("manage:companyInfo:all")){
+                //只能查看自己公司
+                companyInfo.setUserId(SecurityUtils.getUserId());
+            }
+        }
+        return companyInfo;
     }
 
     /**
@@ -74,8 +91,7 @@ public class CompanyInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:companyInfo:query')")
     @GetMapping(value = "/{companyId}")
-    public AjaxResult getInfo(@PathVariable("companyId") Long companyId)
-    {
+    public AjaxResult getInfo(@PathVariable("companyId") Long companyId) {
         CompanyInfo companyInfo = companyInfoService.selectCompanyInfoByCompanyId(companyId);
         return success(CompanyInfoVo.objToVo(companyInfo));
     }
@@ -86,8 +102,7 @@ public class CompanyInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:companyInfo:add')")
     @Log(title = "公司信息", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CompanyInfoInsert companyInfoInsert)
-    {
+    public AjaxResult add(@RequestBody CompanyInfoInsert companyInfoInsert) {
         CompanyInfo companyInfo = CompanyInfoInsert.insertToObj(companyInfoInsert);
         return toAjax(companyInfoService.insertCompanyInfo(companyInfo));
     }
@@ -98,8 +113,7 @@ public class CompanyInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:companyInfo:edit')")
     @Log(title = "公司信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody CompanyInfoEdit companyInfoEdit)
-    {
+    public AjaxResult edit(@RequestBody CompanyInfoEdit companyInfoEdit) {
         CompanyInfo companyInfo = CompanyInfoEdit.editToObj(companyInfoEdit);
         return toAjax(companyInfoService.updateCompanyInfo(companyInfo));
     }
@@ -109,9 +123,8 @@ public class CompanyInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:companyInfo:remove')")
     @Log(title = "公司信息", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{companyIds}")
-    public AjaxResult remove(@PathVariable Long[] companyIds)
-    {
+    @DeleteMapping("/{companyIds}")
+    public AjaxResult remove(@PathVariable Long[] companyIds) {
         return toAjax(companyInfoService.deleteCompanyInfoByCompanyIds(companyIds));
     }
 }

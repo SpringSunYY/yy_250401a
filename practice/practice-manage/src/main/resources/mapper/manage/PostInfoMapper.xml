@@ -25,14 +25,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectPostInfoList" parameterType="PostInfo" resultMap="PostInfoResult">
         <include refid="selectPostInfoVo"/>
-        <where>  
-            <if test="postId != null "> and post_id = #{postId}</if>
-            <if test="postName != null  and postName != ''"> and post_name like concat('%', #{postName}, '%')</if>
-            <if test="postType != null "> and post_type = #{postType}</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}</if>
-            <if test="updateBy != null  and updateBy != ''"> and update_by like concat('%', #{updateBy}, '%')</if>
-            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''"> and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}</if>
+        <where>
+            <if test="companyIds != null and companyIds.size > 0">
+                and company_id in
+                <foreach collection="companyIds" item="companyId" open="(" separator="," close=")">
+                    #{companyId}
+                </foreach>
+            </if>
+            <if test="postId != null ">and post_id = #{postId}</if>
+            <if test="postName != null  and postName != ''">and post_name like concat('%', #{postName}, '%')</if>
+            <if test="postStatus != null ">and post_status = #{postStatus}</if>
+            <if test="postType != null ">and post_type = #{postType}</if>
+            <if test="userId != null ">and user_id = #{userId}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
+                and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}
+            </if>
+            <if test="updateBy != null  and updateBy != ''">and update_by like concat('%', #{updateBy}, '%')</if>
+            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''">
+                and DATE_FORMAT(update_time, '%Y-%m-%d') between #{params.beginUpdateTime} and #{params.endUpdateTime}
+            </if>
         </where>
         order by create_time desc
     </select>

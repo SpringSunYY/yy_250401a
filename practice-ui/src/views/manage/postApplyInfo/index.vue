@@ -251,7 +251,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="状态" v-hasPermi="['manage:postApplyInfo:edit']" prop="applyStatus">
+        <el-form-item label="状态" v-hasPermi="['manage:postApplyInfo:audit']" prop="applyStatus">
           <el-radio-group v-model="form.applyStatus">
             <el-radio
               v-for="dict in dict.type.m_common_status"
@@ -354,7 +354,8 @@ export default {
       postQueryParams: {
         postName: '',
         pageNum: 1,
-        pageSize: 100
+        pageSize: 100,
+        postStatus: '1'
       },
       //表格展示列
       columns: [
@@ -418,7 +419,7 @@ export default {
           { required: true, message: '岗位编号不能为空', trigger: 'blur' }
         ],
         applyStatus: [
-          { required: true, message: '状态不能为空', trigger: 'change' }
+          { required: false, message: '状态不能为空', trigger: 'change' }
         ],
         userId: [
           { required: true, message: '创建人不能为空', trigger: 'blur' }

@@ -363,7 +363,7 @@ export default {
           { required: true, message: '公司名称不能为空', trigger: 'blur' }
         ],
         companyStatus: [
-          { required: true, message: '公司状态不能为空', trigger: 'change' }
+          { required: false, message: '公司状态不能为空', trigger: 'change' }
         ],
         userId: [
           { required: true, message: '创建人不能为空', trigger: 'blur' }

@@ -28,6 +28,8 @@ public class PostInfoQuery implements Serializable
     /** 岗位名称 */
     private String postName;
 
+    private Long postStatus;
+
     /** 岗位类型 */
     private Long postType;
 

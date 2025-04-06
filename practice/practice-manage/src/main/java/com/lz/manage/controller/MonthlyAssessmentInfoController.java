@@ -3,8 +3,17 @@ package com.lz.manage.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.lz.common.utils.SecurityUtils;
+import com.lz.common.utils.StringUtils;
+import com.lz.manage.mapper.CompanyInfoMapper;
+import com.lz.manage.model.domain.CompanyInfo;
+import com.lz.manage.service.ICompanyInfoService;
+import jdk.nashorn.api.scripting.ScriptUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,22 +43,30 @@ import com.lz.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/manage/monthlyAssessmentInfo")
-public class MonthlyAssessmentInfoController extends BaseController
-{
+public class MonthlyAssessmentInfoController extends BaseController {
     @Resource
     private IMonthlyAssessmentInfoService monthlyAssessmentInfoService;
+
+    @Resource
+    private CompanyInfoMapper companyInfoMapper;
 
     /**
      * 查询月度考核列表
      */
     @PreAuthorize("@ss.hasPermi('manage:monthlyAssessmentInfo:list')")
     @GetMapping("/list")
-    public TableDataInfo list(MonthlyAssessmentInfoQuery monthlyAssessmentInfoQuery)
-    {
-        MonthlyAssessmentInfo monthlyAssessmentInfo = MonthlyAssessmentInfoQuery.queryToObj(monthlyAssessmentInfoQuery);
+    public TableDataInfo list(MonthlyAssessmentInfoQuery monthlyAssessmentInfoQuery) {
+        MonthlyAssessmentInfo monthlyAssessmentInfo = getMonthlyAssessmentInfo(monthlyAssessmentInfoQuery);
+        if (StringUtils.isNull(monthlyAssessmentInfo)) {
+            return new TableDataInfo();
+        }
+        return getTableDataInfo(monthlyAssessmentInfo);
+    }
+
+    private TableDataInfo getTableDataInfo(MonthlyAssessmentInfo monthlyAssessmentInfo) {
         startPage();
         List<MonthlyAssessmentInfo> list = monthlyAssessmentInfoService.selectMonthlyAssessmentInfoList(monthlyAssessmentInfo);
-        List<MonthlyAssessmentInfoVo> listVo= list.stream().map(MonthlyAssessmentInfoVo::objToVo).collect(Collectors.toList());
+        List<MonthlyAssessmentInfoVo> listVo = list.stream().map(MonthlyAssessmentInfoVo::objToVo).collect(Collectors.toList());
         TableDataInfo table = getDataTable(list);
         table.setRows(listVo);
         return table;
@@ -61,12 +78,40 @@ public class MonthlyAssessmentInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:monthlyAssessmentInfo:export')")
     @Log(title = "月度考核", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, MonthlyAssessmentInfoQuery monthlyAssessmentInfoQuery)
-    {
-        MonthlyAssessmentInfo monthlyAssessmentInfo = MonthlyAssessmentInfoQuery.queryToObj(monthlyAssessmentInfoQuery);
+    public void export(HttpServletResponse response, MonthlyAssessmentInfoQuery monthlyAssessmentInfoQuery) {
+        MonthlyAssessmentInfo monthlyAssessmentInfo = getMonthlyAssessmentInfo(monthlyAssessmentInfoQuery);
+        if (StringUtils.isNull(monthlyAssessmentInfo)) {
+            return;
+        }
         List<MonthlyAssessmentInfo> list = monthlyAssessmentInfoService.selectMonthlyAssessmentInfoList(monthlyAssessmentInfo);
         ExcelUtil<MonthlyAssessmentInfo> util = new ExcelUtil<MonthlyAssessmentInfo>(MonthlyAssessmentInfo.class);
         util.exportExcel(response, list, "月度考核数据");
+    }
+
+    private MonthlyAssessmentInfo getMonthlyAssessmentInfo(MonthlyAssessmentInfoQuery monthlyAssessmentInfoQuery) {
+        MonthlyAssessmentInfo monthlyAssessmentInfo = MonthlyAssessmentInfoQuery.queryToObj(monthlyAssessmentInfoQuery);
+        //是否有查看全部
+        if (!SecurityUtils.hasPermi("manage:all")) {
+            if (SecurityUtils.hasPermi("manage:monthlyAssessmentInfo:myCompany")) {
+                //只能查看自己公司
+                CompanyInfo companyInfo = new CompanyInfo();
+                companyInfo.setUserId(SecurityUtils.getUserId());
+                List<CompanyInfo> companyInfos = companyInfoMapper.selectCompanyInfoList(companyInfo);
+                //获取所有的公司id
+                List<Long> companyIds = companyInfos.stream().map(CompanyInfo::getCompanyId).collect(Collectors.toList());
+                if (StringUtils.isEmpty(companyIds)) {
+                    return null;
+                }
+                monthlyAssessmentInfo.setCompanyIds(companyIds);
+            } else if (SecurityUtils.hasPermi("manage:monthlyAssessmentInfo:dept")) {
+                //查看自己班级
+                monthlyAssessmentInfo.setDeptId(SecurityUtils.getDeptId());
+            } else {
+                //只能查看自己
+                monthlyAssessmentInfo.setUserId(SecurityUtils.getUserId());
+            }
+        }
+        return monthlyAssessmentInfo;
     }
 
     /**
@@ -74,8 +119,7 @@ public class MonthlyAssessmentInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:monthlyAssessmentInfo:query')")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
         MonthlyAssessmentInfo monthlyAssessmentInfo = monthlyAssessmentInfoService.selectMonthlyAssessmentInfoById(id);
         return success(MonthlyAssessmentInfoVo.objToVo(monthlyAssessmentInfo));
     }
@@ -86,8 +130,7 @@ public class MonthlyAssessmentInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:monthlyAssessmentInfo:add')")
     @Log(title = "月度考核", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody MonthlyAssessmentInfoInsert monthlyAssessmentInfoInsert)
-    {
+    public AjaxResult add(@RequestBody MonthlyAssessmentInfoInsert monthlyAssessmentInfoInsert) {
         MonthlyAssessmentInfo monthlyAssessmentInfo = MonthlyAssessmentInfoInsert.insertToObj(monthlyAssessmentInfoInsert);
         return toAjax(monthlyAssessmentInfoService.insertMonthlyAssessmentInfo(monthlyAssessmentInfo));
     }
@@ -98,8 +141,7 @@ public class MonthlyAssessmentInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:monthlyAssessmentInfo:edit')")
     @Log(title = "月度考核", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody MonthlyAssessmentInfoEdit monthlyAssessmentInfoEdit)
-    {
+    public AjaxResult edit(@RequestBody MonthlyAssessmentInfoEdit monthlyAssessmentInfoEdit) {
         MonthlyAssessmentInfo monthlyAssessmentInfo = MonthlyAssessmentInfoEdit.editToObj(monthlyAssessmentInfoEdit);
         return toAjax(monthlyAssessmentInfoService.updateMonthlyAssessmentInfo(monthlyAssessmentInfo));
     }
@@ -109,9 +151,8 @@ public class MonthlyAssessmentInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:monthlyAssessmentInfo:remove')")
     @Log(title = "月度考核", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
+    @DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(monthlyAssessmentInfoService.deleteMonthlyAssessmentInfoByIds(ids));
     }
 }

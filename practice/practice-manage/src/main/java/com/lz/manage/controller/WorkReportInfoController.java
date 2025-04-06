@@ -3,8 +3,13 @@ package com.lz.manage.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.lz.common.utils.SecurityUtils;
+import com.lz.manage.mapper.CompanyInfoMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import javax.annotation.Resource;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,22 +39,23 @@ import com.lz.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/manage/workReportInfo")
-public class WorkReportInfoController extends BaseController
-{
+public class WorkReportInfoController extends BaseController {
     @Resource
     private IWorkReportInfoService workReportInfoService;
+
+    @Resource
+    private CompanyInfoMapper companyInfoMapper;
 
     /**
      * 查询工作报告列表
      */
     @PreAuthorize("@ss.hasPermi('manage:workReportInfo:list')")
     @GetMapping("/list")
-    public TableDataInfo list(WorkReportInfoQuery workReportInfoQuery)
-    {
-        WorkReportInfo workReportInfo = WorkReportInfoQuery.queryToObj(workReportInfoQuery);
+    public TableDataInfo list(WorkReportInfoQuery workReportInfoQuery) {
+        WorkReportInfo workReportInfo = getWorkReportInfo(workReportInfoQuery);
         startPage();
         List<WorkReportInfo> list = workReportInfoService.selectWorkReportInfoList(workReportInfo);
-        List<WorkReportInfoVo> listVo= list.stream().map(WorkReportInfoVo::objToVo).collect(Collectors.toList());
+        List<WorkReportInfoVo> listVo = list.stream().map(WorkReportInfoVo::objToVo).collect(Collectors.toList());
         TableDataInfo table = getDataTable(list);
         table.setRows(listVo);
         return table;
@@ -61,12 +67,26 @@ public class WorkReportInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:workReportInfo:export')")
     @Log(title = "工作报告", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, WorkReportInfoQuery workReportInfoQuery)
-    {
-        WorkReportInfo workReportInfo = WorkReportInfoQuery.queryToObj(workReportInfoQuery);
+    public void export(HttpServletResponse response, WorkReportInfoQuery workReportInfoQuery) {
+        WorkReportInfo workReportInfo = getWorkReportInfo(workReportInfoQuery);
         List<WorkReportInfo> list = workReportInfoService.selectWorkReportInfoList(workReportInfo);
         ExcelUtil<WorkReportInfo> util = new ExcelUtil<WorkReportInfo>(WorkReportInfo.class);
         util.exportExcel(response, list, "工作报告数据");
+    }
+
+    private static WorkReportInfo getWorkReportInfo(WorkReportInfoQuery workReportInfoQuery) {
+        WorkReportInfo workReportInfo = WorkReportInfoQuery.queryToObj(workReportInfoQuery);
+        //查看全部
+        if (!SecurityUtils.hasPermi("manage:all")) {
+            //查看班级
+            if (SecurityUtils.hasPermi("manage:workReportInfo:dept")) {
+                workReportInfo.setDeptId(SecurityUtils.getDeptId());
+            } else {
+                //只能查看自己
+                workReportInfo.setUserId(SecurityUtils.getUserId());
+            }
+        }
+        return workReportInfo;
     }
 
     /**
@@ -74,8 +94,7 @@ public class WorkReportInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:workReportInfo:query')")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
         WorkReportInfo workReportInfo = workReportInfoService.selectWorkReportInfoById(id);
         return success(WorkReportInfoVo.objToVo(workReportInfo));
     }
@@ -86,8 +105,7 @@ public class WorkReportInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:workReportInfo:add')")
     @Log(title = "工作报告", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody WorkReportInfoInsert workReportInfoInsert)
-    {
+    public AjaxResult add(@RequestBody WorkReportInfoInsert workReportInfoInsert) {
         WorkReportInfo workReportInfo = WorkReportInfoInsert.insertToObj(workReportInfoInsert);
         return toAjax(workReportInfoService.insertWorkReportInfo(workReportInfo));
     }
@@ -98,8 +116,7 @@ public class WorkReportInfoController extends BaseController
     @PreAuthorize("@ss.hasPermi('manage:workReportInfo:edit')")
     @Log(title = "工作报告", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody WorkReportInfoEdit workReportInfoEdit)
-    {
+    public AjaxResult edit(@RequestBody WorkReportInfoEdit workReportInfoEdit) {
         WorkReportInfo workReportInfo = WorkReportInfoEdit.editToObj(workReportInfoEdit);
         return toAjax(workReportInfoService.updateWorkReportInfo(workReportInfo));
     }
@@ -109,9 +126,8 @@ public class WorkReportInfoController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:workReportInfo:remove')")
     @Log(title = "工作报告", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
+    @DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(workReportInfoService.deleteWorkReportInfoByIds(ids));
     }
 }

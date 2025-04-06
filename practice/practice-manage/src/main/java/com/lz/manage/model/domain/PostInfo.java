@@ -1,6 +1,7 @@
 package com.lz.manage.model.domain;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.Date;
 import java.util.Date;
@@ -34,6 +35,8 @@ public class PostInfo implements Serializable
     @Excel(name = "公司编号")
     private String companyName;
     private Long companyId;
+    @TableField(exist = false)
+    private List<Long> companyIds;
 
     /** 岗位名称 */
     @Excel(name = "岗位名称")

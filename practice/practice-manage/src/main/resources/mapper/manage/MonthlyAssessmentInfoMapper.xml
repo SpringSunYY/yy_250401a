@@ -49,6 +49,12 @@
             <if test="createBy != null  and createBy != ''">and create_by = #{createBy}</if>
             <if test="userId != null ">and user_id = #{userId}</if>
             <if test="deptId != null ">and dept_id = #{deptId}</if>
+            <if test="companyIds != null and companyIds.size > 0">
+                and company_id in
+                <foreach collection="companyIds" item="companyId" open="(" separator="," close=")">
+                    #{companyId}
+                </foreach>
+            </if>
             <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''">
                 and DATE_FORMAT(create_time, '%Y-%m-%d') between #{params.beginCreateTime} and #{params.endCreateTime}
             </if>

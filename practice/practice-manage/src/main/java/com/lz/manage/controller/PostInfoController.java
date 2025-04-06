@@ -3,6 +3,11 @@ package com.lz.manage.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.lz.common.utils.SecurityUtils;
+import com.lz.common.utils.StringUtils;
+import com.lz.manage.mapper.CompanyInfoMapper;
+import com.lz.manage.model.domain.CompanyInfo;
 import org.springframework.security.access.prepost.PreAuthorize;
 import javax.annotation.Resource;
 
@@ -41,6 +46,9 @@ public class PostInfoController extends BaseController
     @Resource
     private IPostInfoService postInfoService;
 
+    @Resource
+    private CompanyInfoMapper companyInfoMapper;
+
     /**
      * 查询岗位信息列表
      */
@@ -48,7 +56,10 @@ public class PostInfoController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(PostInfoQuery postInfoQuery)
     {
-        PostInfo postInfo = PostInfoQuery.queryToObj(postInfoQuery);
+        PostInfo postInfo = getPostInfo(postInfoQuery);
+        if (StringUtils.isNull(postInfo)) {
+            return new TableDataInfo();
+        }
         startPage();
         List<PostInfo> list = postInfoService.selectPostInfoList(postInfo);
         List<PostInfoVo> listVo= list.stream().map(PostInfoVo::objToVo).collect(Collectors.toList());
@@ -65,10 +76,32 @@ public class PostInfoController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, PostInfoQuery postInfoQuery)
     {
-        PostInfo postInfo = PostInfoQuery.queryToObj(postInfoQuery);
+        PostInfo postInfo = getPostInfo(postInfoQuery);
+        if (StringUtils.isNull(postInfo)) {
+            return;
+        }
         List<PostInfo> list = postInfoService.selectPostInfoList(postInfo);
         ExcelUtil<PostInfo> util = new ExcelUtil<PostInfo>(PostInfo.class);
         util.exportExcel(response, list, "岗位信息数据");
+    }
+
+    private PostInfo getPostInfo(PostInfoQuery postInfoQuery) {
+        PostInfo postInfo = PostInfoQuery.queryToObj(postInfoQuery);
+        //查看全部或者查看公司
+        if (!SecurityUtils.hasPermi("manage:all")) {
+            if (!SecurityUtils.hasPermi("manage:postInfo:company")){
+                CompanyInfo companyInfo = new CompanyInfo();
+                companyInfo.setUserId(SecurityUtils.getUserId());
+                List<CompanyInfo> companyInfos = companyInfoMapper.selectCompanyInfoList(companyInfo);
+                //获取所有的公司id
+                List<Long> companyIds = companyInfos.stream().map(CompanyInfo::getCompanyId).collect(Collectors.toList());
+                if (StringUtils.isEmpty(companyInfos)) {
+                    return null;
+                }
+                postInfo.setCompanyIds(companyIds);
+            }
+        }
+        return postInfo;
     }
 
     /**
